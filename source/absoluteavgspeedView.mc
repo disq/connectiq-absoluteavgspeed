@@ -46,7 +46,8 @@ class absoluteavgspeedView extends WatchUi.DataField {
 			return;
 		}
 
-		var val = info.elapsedDistance / info.elapsedTime / 1000; // m/s
+//		System.println("elapsed d=" + info.elapsedDistance + " t=" + info.elapsedTime);
+		var val = info.elapsedDistance / (info.elapsedTime.toFloat() / 1000.0f); // m/s
 		mValue = metric ? val * 3.6 :  val * 2.23694;
 	}
 
@@ -86,7 +87,15 @@ class absoluteavgspeedView extends WatchUi.DataField {
 			text = "__.__";
 //			units = "";
 		} else {
-			text = mValue.format("%.2f");
+			if (mValue >= 100.0f) {
+				if (mValue >= 999.9f) {
+					text = "999.9";
+				} else {
+					text = mValue.format("%.1f");
+				}
+			} else {
+				text = mValue.format("%.2f");
+			}
 //			units = metric ? "kph" : "mph";
 		}
 
