@@ -5,6 +5,8 @@ class absoluteavgspeedView extends WatchUi.DataField {
 
     hidden var hasBackgroundColorOption = false;
     hidden var mValue;
+    hidden var mDeclining = false;
+    hidden var oldDistance, oldTime;
 	hidden var metric = true;
 
 	hidden var labelText, labelPos, valuePos, unit1Pos, unit2Pos, unit1, unit2;
@@ -24,6 +26,9 @@ class absoluteavgspeedView extends WatchUi.DataField {
 
         hasBackgroundColorOption = (self has :getBackgroundColor);
         mValue = VALUE_DISABLED;
+        oldDistance = VALUE_DISABLED;
+        oldTime = VALUE_DISABLED;
+        mDeclining = false;
     }
 
     // Set your layout here. Anytime the size of obscurity of
@@ -58,12 +63,19 @@ class absoluteavgspeedView extends WatchUi.DataField {
 
        if (info == null || info.elapsedTime == null || info.elapsedTime <= 0 || (!(info has :elapsedDistance)) || info.elapsedDistance == null) {
 			mValue = VALUE_DISABLED;
+			oldDistance = VALUE_DISABLED;
+			oldTime = VALUE_DISABLED;
+			mDeclining = false;
 			return;
 		}
 
 //		System.println("elapsed d=" + info.elapsedDistance + " t=" + info.elapsedTime);
 		var val = info.elapsedDistance / (info.elapsedTime.toFloat() / 1000.0f); // m/s
 		mValue = metric ? val * 3.6 :  val * 2.23694;
+		mDeclining = info.elapsedDistance == oldDistance && info.elapsedTime.toFloat() > oldTime;
+
+		oldDistance = info.elapsedDistance;
+		oldTime = info.elapsedTime.toFloat();
 	}
 
     // Display the value you computed here. This will be called
@@ -85,9 +97,16 @@ class absoluteavgspeedView extends WatchUi.DataField {
 			textColor = Graphics.COLOR_BLACK;
 		}
 
-		dc.setColor(textColor, backgroundColor);
-		dc.clear();
-		dc.setColor(textColor, Graphics.COLOR_TRANSPARENT);
+		if (mValue != VALUE_DISABLED && mDeclining) {
+			// Invert colours if decreasing
+			dc.setColor(backgroundColor, textColor);
+			dc.clear();
+			dc.setColor(backgroundColor, Graphics.COLOR_TRANSPARENT);
+		} else {
+			dc.setColor(textColor, backgroundColor);
+			dc.clear();
+			dc.setColor(textColor, Graphics.COLOR_TRANSPARENT);
+		}
 
 		var text;
 
