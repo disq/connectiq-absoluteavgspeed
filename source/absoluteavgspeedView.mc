@@ -9,7 +9,8 @@ class absoluteavgspeedView extends WatchUi.DataField {
     hidden var oldDistance, oldTime;
 	hidden var metric = true;
 
-	hidden var labelText, labelPos, valuePos, unit1Pos, unit2Pos, unit1, unit2;
+	hidden var labelText, labelPos, unit1, unit2;
+	hidden var valuePos = [ [ 0, 0 ], [ 0, 0 ] ], unit1Pos = [ [ 0, 0 ], [ 0, 0 ] ], unit2Pos = [ [ 0, 0 ], [ 0, 0 ] ];
 
 	const VALUE_DISABLED = -1.0f;
 	const LABEL_FONT = Graphics.FONT_SYSTEM_SMALL;
@@ -36,22 +37,32 @@ class absoluteavgspeedView extends WatchUi.DataField {
     function onLayout(dc) {
 		var width = dc.getWidth();
 		var height = dc.getHeight();
-		var halfWidth = Math.floor(width / 2);
 
 		// Label things
 		labelText = WatchUi.loadResource(Rez.Strings.label);
-		labelPos = [ halfWidth, 3 ]; // This is shown as centered so no need adjust x position according to text width
+		labelPos = [ Math.floor(width / 2), 3 ]; // This is shown as centered so no need adjust x position according to text width
 
-		var textWidth = dc.getTextWidthInPixels("88.8", VALUE_FONT);
 		var textHeight = dc.getFontHeight(VALUE_FONT);
 		var unitHeight = dc.getFontHeight(UNIT_FONT);
 		var unit1Width = dc.getTextWidthInPixels(unit1, UNIT_FONT);
 
-		valuePos = [ Math.floor((width - textWidth) / 2) - 4, Math.floor((height - textHeight) / 2) + 14 ];
-		unit1Pos = [ valuePos[0] + textWidth + 4, valuePos[1] ];
-		unit2Pos = [ unit1Pos[0] + (metric ? Math.floor(unit1Width/3) : 3), unit1Pos[1] + unitHeight - 4 ];
+		calculatePosForText(dc, 0, "88.8", width, height, textHeight, unitHeight, unit1Width);
+		calculatePosForText(dc, 1, "8.8", width, height, textHeight, unitHeight, unit1Width);
 
         return true;
+    }
+
+    // calculate positions for the given text and put it in valuePos[idx], unit1Pos[idx] and unit2Pos[idx]
+    function calculatePosForText(dc, idx, text, width, height, textHeight, unitHeight, unit1Width) {
+		var textWidth = dc.getTextWidthInPixels(text, VALUE_FONT);
+
+		var vp = [ Math.floor((width - textWidth) / 2) - 4, Math.floor((height - textHeight) / 2) + 14 ];
+		var u1p = [ vp[0] + textWidth + 4, vp[1] ];
+		var u2p = [ u1p[0] + (metric ? Math.floor(unit1Width/3) : 3), u1p[1] + unitHeight - 4 ];
+
+		valuePos[idx] = vp;
+		unit1Pos[idx] = u1p;
+		unit2Pos[idx] = u2p;
     }
 
     // The given info object contains all the current workout information.
@@ -109,6 +120,7 @@ class absoluteavgspeedView extends WatchUi.DataField {
 		}
 
 		var text;
+		var idx = 0;
 
 		if (mValue == VALUE_DISABLED || mValue < 0.0f) {
 			text = "__._";
@@ -120,7 +132,7 @@ class absoluteavgspeedView extends WatchUi.DataField {
 			} else {
 				text = mValue.format("%.1f");
 				if (mValue < 10.0f) {
-					text = "0" + text; // %2.1f doesn't work?
+					idx = 1; // Use single-digit positions if we're in single digits
 				}
 			}
 		}
@@ -129,11 +141,11 @@ class absoluteavgspeedView extends WatchUi.DataField {
 		dc.drawText(labelPos[0], labelPos[1], LABEL_FONT, labelText, Graphics.TEXT_JUSTIFY_CENTER);
 
 		// Value
-		dc.drawText(valuePos[0], valuePos[1], VALUE_FONT, text, Graphics.TEXT_JUSTIFY_LEFT);
+		dc.drawText(valuePos[idx][0], valuePos[idx][1], VALUE_FONT, text, Graphics.TEXT_JUSTIFY_LEFT);
 
 		// Unit
-		dc.drawText(unit1Pos[0], unit1Pos[1], UNIT_FONT, unit1, Graphics.TEXT_JUSTIFY_LEFT);
-		dc.drawText(unit2Pos[0], unit2Pos[1], UNIT_FONT, unit2, Graphics.TEXT_JUSTIFY_LEFT);
+		dc.drawText(unit1Pos[idx][0], unit1Pos[idx][1], UNIT_FONT, unit1, Graphics.TEXT_JUSTIFY_LEFT);
+		dc.drawText(unit2Pos[idx][0], unit2Pos[idx][1], UNIT_FONT, unit2, Graphics.TEXT_JUSTIFY_LEFT);
     }
 
 }
