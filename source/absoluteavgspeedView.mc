@@ -87,6 +87,10 @@ class absoluteavgspeedView extends WatchUi.DataField {
 
 		oldDistance = info.elapsedDistance;
 		oldTime = info.elapsedTime.toFloat();
+
+		if (mValue < 0.01f) {
+			mValue = 0;
+		}
 	}
 
     // Display the value you computed here. This will be called
