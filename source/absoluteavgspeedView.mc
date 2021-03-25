@@ -6,7 +6,7 @@ class absoluteavgspeedView extends WatchUi.DataField {
     hidden var hasBackgroundColorOption = false;
     hidden var mValue;
     hidden var mDeclining = false;
-    hidden var oldDistance, oldTime;
+    hidden var oldDistance, oldTime, lastCheck = 0;
 	hidden var metric = true;
 
 	hidden var labelText, labelPos, unit1, unit2;
@@ -77,16 +77,31 @@ class absoluteavgspeedView extends WatchUi.DataField {
 			oldDistance = VALUE_DISABLED;
 			oldTime = VALUE_DISABLED;
 			mDeclining = false;
+			lastCheck = 0;
 			return;
 		}
 
 //		System.println("elapsed d=" + info.elapsedDistance + " t=" + info.elapsedTime);
 		var val = info.elapsedDistance / (info.elapsedTime.toFloat() / 1000.0f); // m/s
 		mValue = metric ? val * 3.6 :  val * 2.23694;
-		mDeclining = info.elapsedDistance == oldDistance && info.elapsedTime.toFloat() > oldTime;
 
-		oldDistance = info.elapsedDistance;
-		oldTime = info.elapsedTime.toFloat();
+		var et = info.elapsedTime.toFloat();
+
+		if (lastCheck == 0 || lastCheck > et) {
+//			System.println("reset lastcheck");
+			lastCheck = et;
+		} else if (et - lastCheck > 2800) { // 3 seconds but allow for drift: if we miss the 3s mark the next invocation is probably 1s later, which is too long for us
+			mDeclining = info.elapsedDistance == oldDistance && et > oldTime;
+//			if (mDeclining) {
+//				System.println("checking mDeclining: YES");
+//			} else {
+//				System.println("checking mDeclining: no");
+//			}
+
+			oldDistance = info.elapsedDistance;
+			oldTime = et;
+			lastCheck = et;
+		}
 
 		if (mValue < 0.01f) {
 			mValue = 0;
