@@ -81,16 +81,20 @@ class absoluteavgspeedView extends WatchUi.DataField {
 			return;
 		}
 
+		var et = info.elapsedTime.toFloat();
+
 //		System.println("elapsed d=" + info.elapsedDistance + " t=" + info.elapsedTime);
-		var val = info.elapsedDistance / (info.elapsedTime.toFloat() / 1000.0f); // m/s
+		var val = info.elapsedDistance / (et / 1000.0f); // m/s
 		mValue = metric ? val * 3.6 :  val * 2.23694;
 
-		var et = info.elapsedTime.toFloat();
+		// threshold is 2 and 3 seconds depending on if we're "declining" or not, so it's hard to get into "declining" but easy to bounce back
+		// allow for drift of 200ms because if we miss the mark, next invocation is probably 1s later, which is too long for us
+		var checkThreshold = mDeclining ? 1800 : 2800;
 
 		if (lastCheck == 0 || lastCheck > et) {
 //			System.println("reset lastcheck");
 			lastCheck = et;
-		} else if (et - lastCheck > 2800) { // 3 seconds but allow for drift: if we miss the 3s mark the next invocation is probably 1s later, which is too long for us
+		} else if (et - lastCheck > checkThreshold) {
 			mDeclining = info.elapsedDistance == oldDistance && et > oldTime;
 //			if (mDeclining) {
 //				System.println("checking mDeclining: YES");
