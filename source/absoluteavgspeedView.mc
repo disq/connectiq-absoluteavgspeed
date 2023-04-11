@@ -48,8 +48,6 @@ class absoluteavgspeedView extends WatchUi.DataField {
 
 		calculatePosForText(dc, 0, "88.8", width, height, textHeight, unitHeight, unit1Width);
 		calculatePosForText(dc, 1, "8.8", width, height, textHeight, unitHeight, unit1Width);
-
-        return true;
     }
 
     // calculate positions for the given text and put it in valuePos[idx], unit1Pos[idx] and unit2Pos[idx]
