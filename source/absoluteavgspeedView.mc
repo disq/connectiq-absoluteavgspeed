@@ -1,5 +1,6 @@
 using Toybox.WatchUi;
 using Toybox.Graphics;
+import Toybox.Lang;
 
 class absoluteavgspeedView extends WatchUi.DataField {
 
@@ -9,8 +10,11 @@ class absoluteavgspeedView extends WatchUi.DataField {
     hidden var oldDistance, oldTime, lastCheck = 0;
 	hidden var metric = true;
 
-	hidden var labelText, labelPos, unit1, unit2;
-	hidden var valuePos = [ [ 0, 0 ], [ 0, 0 ] ], unit1Pos = [ [ 0, 0 ], [ 0, 0 ] ], unit2Pos = [ [ 0, 0 ], [ 0, 0 ] ];
+	hidden var labelText, unit1, unit2;
+	hidden var labelPos as Array<Number> = [ 0, 0 ];
+	hidden var valuePos as Array<Array<Number>> = [ [ 0, 0 ], [ 0, 0 ] ],
+	           unit1Pos as Array<Array<Number>> = [ [ 0, 0 ], [ 0, 0 ] ],
+    	       unit2Pos as Array<Array<Number>> = [ [ 0, 0 ], [ 0, 0 ] ];
 
 	const VALUE_DISABLED = -1.0f;
 	const LABEL_FONT = Graphics.FONT_SYSTEM_SMALL;
